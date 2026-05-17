@@ -1,0 +1,9 @@
+- hosts: vpn
+  become: yes
+
+  roles:
+    - vpn
+    - security
+    - monitoring
+    - wireguard_exporter
+    - nginx

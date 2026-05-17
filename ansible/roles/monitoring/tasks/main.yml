@@ -1,0 +1,72 @@
+- name: Install monitoring packages
+  apt:
+    name:
+      - prometheus
+      - prometheus-node-exporter
+      - grafana
+      - prometheus-alertmanager
+    state: present
+    update_cache: yes
+
+- name: Configure Prometheus scrape jobs
+  copy:
+    dest: /etc/prometheus/prometheus.yml
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      global:
+        scrape_interval: 15s
+
+      scrape_configs:
+        - job_name: prometheus
+          static_configs:
+            - targets: ['localhost:9090']
+
+        - job_name: node
+          static_configs:
+            - targets: ['localhost:9100']
+
+        - job_name: wireguard
+          static_configs:
+            - targets: ['localhost:9586']
+
+- name: Ensure Prometheus is running
+  systemd:
+    name: prometheus
+    state: restarted
+    enabled: yes
+
+- name: Ensure Node Exporter is running
+  systemd:
+    name: prometheus-node-exporter
+    state: started
+    enabled: yes
+
+- name: Ensure Grafana is running
+  systemd:
+    name: grafana-server
+    state: started
+    enabled: yes
+
+- name: Create Alertmanager config directory
+  file:
+    path: /etc/alertmanager
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Deploy Alertmanager config
+  template:
+    src: alertmanager.yml.j2
+    dest: /etc/alertmanager/alertmanager.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Ensure Alertmanager is running
+  systemd:
+    name: prometheus-alertmanager
+    state: restarted
+    enabled: yes

@@ -1,0 +1,14 @@
+vpn_private_key: "sA3u/IioSm18zTzUM/tw5k13qa8aEBU1q8c5YaWyEEk="
+
+peers:
+  - name: test
+    public_key: "eQ/x2iO2MNOGNs+XjRSxGU+SEcMIhVsbOqUcXQFTyFE="
+    allowed_ip: "10.0.0.2/32"
+
+  - name: test2
+    public_key: "DIPRE7wpjxIZWLlfNgYQNdJLpIdZT6cT6tOPFew5fSY="
+    allowed_ip: "10.0.0.3/32"
+
+  - name: test3
+    public_key: "BGvwLCWsetTuYlwf7P3VCQlt8KbxW42JxSK/l3gj1iY="
+    allowed_ip: "10.0.0.4/32"

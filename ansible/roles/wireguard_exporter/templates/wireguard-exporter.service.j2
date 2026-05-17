@@ -1,0 +1,12 @@
+[Unit]
+Description=Prometheus WireGuard Exporter
+After=network.target wg-quick@wg0.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus_wireguard_exporter -i wg0 -p 9586
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,47 @@
+- name: Install security packages
+  apt:
+    name:
+      - ufw
+      - fail2ban
+    state: present
+    update_cache: yes
+
+- name: Allow SSH
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Allow WireGuard VPN
+  ufw:
+    rule: allow
+    port: '51820'
+    proto: udp
+
+- name: Allow HTTP for NGINX
+  ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+
+- name: Enable UFW firewall
+  ufw:
+    state: enabled
+    policy: deny
+
+- name: Configure Fail2ban for SSH
+  copy:
+    dest: /etc/fail2ban/jail.local
+    content: |
+      [sshd]
+      enabled = true
+      port = ssh
+      maxretry = 3
+      findtime = 600
+      bantime = 900
+
+- name: Restart Fail2ban
+  systemd:
+    name: fail2ban
+    state: restarted
+    enabled: yes

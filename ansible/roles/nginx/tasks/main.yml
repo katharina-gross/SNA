@@ -1,0 +1,51 @@
+- name: Install NGINX and apache2-utils
+  apt:
+    name:
+      - nginx
+      - apache2-utils
+    state: present
+    update_cache: yes
+
+- name: Create basic auth user for Grafana
+  command: htpasswd -bc /etc/nginx/.htpasswd admin admin123
+  no_log: true
+
+- name: Create NGINX config for Grafana
+  copy:
+    dest: /etc/nginx/sites-available/grafana
+    content: |
+      server {
+          listen 80;
+          server_name 116.203.58.216;
+
+          auth_basic "VPN Monitoring";
+          auth_basic_user_file /etc/nginx/.htpasswd;
+
+          location / {
+              proxy_pass http://127.0.0.1:3000;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+          }
+      }
+
+- name: Enable Grafana site
+  file:
+    src: /etc/nginx/sites-available/grafana
+    dest: /etc/nginx/sites-enabled/grafana
+    state: link
+
+- name: Remove default NGINX site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Test NGINX config
+  command: nginx -t
+
+- name: Restart NGINX
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: yes

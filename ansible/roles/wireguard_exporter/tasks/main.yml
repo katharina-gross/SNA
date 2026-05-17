@@ -1,0 +1,39 @@
+- name: Install dependencies for WireGuard exporter
+  apt:
+    name:
+      - cargo
+      - rustc
+      - pkg-config
+      - libssl-dev
+      - wireguard-tools
+    state: present
+    update_cache: yes
+
+- name: Install WireGuard exporter using Cargo
+  command: cargo install prometheus_wireguard_exporter --locked
+  environment:
+    CARGO_HOME: /root/.cargo
+    PATH: "/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+- name: Copy WireGuard exporter binary
+  copy:
+    src: /root/.cargo/bin/prometheus_wireguard_exporter
+    dest: /usr/local/bin/prometheus_wireguard_exporter
+    remote_src: yes
+    mode: '0755'
+
+- name: Deploy WireGuard exporter systemd service
+  template:
+    src: wireguard-exporter.service.j2
+    dest: /etc/systemd/system/wireguard-exporter.service
+    mode: '0644'
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Start and enable WireGuard exporter
+  systemd:
+    name: wireguard-exporter
+    state: restarted
+    enabled: yes
